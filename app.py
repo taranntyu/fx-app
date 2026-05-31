@@ -12,40 +12,25 @@ if not os.path.exists(FILE_PATH):
     st.warning(f"⚠️ エクセルファイル（{FILE_PATH}）が見つかりません。")
 else:
     try:
+        # エクセルを読み込む
         df = pd.read_excel(FILE_PATH)
         
-        # 💡【ここが進化！】空っぽの行や列を削除し、空欄（nan）を自動で消し去る魔法
-        df = df.dropna(how='all')  # 全て空欄の行を削除
-        df = df.dropna(axis=1, how='all')  # 全て空欄の列を削除
-        df = df.fillna("")  # 空欄(nan)を何も見えない空文字にする
+        # 空白や不要な行・列を綺麗に掃除する
+        df = df.dropna(how='all')
+        df = df.dropna(axis=1, how='all')
+        df = df.fillna("")
         
         if df.empty:
             st.info("現在、表示するデータがありません。")
         else:
-            cols = st.columns(3)
+            st.write("最新の相場分析データです。（項目をタップすると並び替えができます）")
             
-            for index, row in df.iterrows():
-                col = cols[index % 3]
-                with col:
-                    # エクセルの左から順番にデータを取る（データがない場合は空白にする）
-                    currency = str(row.iloc[0]) if len(df.columns) > 0 else "不明"
-                    judge = str(row.iloc[1]) if len(df.columns) > 1 else "-"
-                    importance = str(row.iloc[2]) if len(df.columns) > 2 else ""
-                    comment = str(row.iloc[3]) if len(df.columns) > 3 else ""
-                    
-                    # 買いは赤、売りは青に色分け
-                    color = "red" if judge == "買い" else "blue" if judge == "売り" else "black"
-                    
-                    st.markdown(f"""
-                    <div style="border: 2px solid #e6e6e6; border-radius: 10px; padding: 15px; margin-bottom: 15px; background-color: #f9f9f9; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);">
-                        <h3 style="margin-top: 0; color: #1f77b4; border-bottom: 2px solid #1f77b4; padding-bottom: 5px;">{currency}</h3>
-                        <p style="font-size: 18px; margin: 10px 0;"><strong>判定：</strong> <span style="font-size: 1.3em; font-weight: bold; color: {color};">{judge}</span></p>
-                        <p style="font-size: 18px; margin: 10px 0;"><strong>重要度：</strong> <span style="color: #ffaa00; font-size: 1.2em;">{importance}</span></p>
-                        <div style="background-color: #ffffff; padding: 10px; border-radius: 5px; border: 1px dashed #ccc;">
-                            <p style="margin: 0; font-size: 14px; color: #555;"><strong>📝コメント</strong><br>{comment}</p>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
+            # ✨ ここがポイント！エクセルをそのまま一番綺麗な「表」で表示する魔法
+            st.dataframe(
+                df,
+                use_container_width=True,  # スマホの画面幅にピッタリ合わせる
+                height=600  # 表の高さをしっかり確保
+            )
                     
     except Exception as e:
         st.error(f"データの読み込み中にエラーが発生しました。詳細: {e}")
