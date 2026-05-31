@@ -14,16 +14,20 @@ else:
     try:
         df = pd.read_excel(FILE_PATH)
         
+        # 💡【ここが進化！】空っぽの行や列を削除し、空欄（nan）を自動で消し去る魔法
+        df = df.dropna(how='all')  # 全て空欄の行を削除
+        df = df.dropna(axis=1, how='all')  # 全て空欄の列を削除
+        df = df.fillna("")  # 空欄(nan)を何も見えない空文字にする
+        
         if df.empty:
             st.info("現在、表示するデータがありません。")
         else:
-            # 💡見出しの名前が違っても大丈夫なように、左から順番（位置）でデータを強制取得します
             cols = st.columns(3)
             
             for index, row in df.iterrows():
                 col = cols[index % 3]
                 with col:
-                    # エクセルの A列(0), B列(1), C列(2), D列(3) のデータを順番に抜き出す
+                    # エクセルの左から順番にデータを取る（データがない場合は空白にする）
                     currency = str(row.iloc[0]) if len(df.columns) > 0 else "不明"
                     judge = str(row.iloc[1]) if len(df.columns) > 1 else "-"
                     importance = str(row.iloc[2]) if len(df.columns) > 2 else ""
